@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/base64"
 	"go.nandlabs.io/l3"
-	"go.nandlabs.io/turboauth"
+	"go.nandlabs.io/turbo-auth"
 	"net/http"
 	"strings"
 )

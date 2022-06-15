@@ -1,4 +1,4 @@
-package turboauth
+package turbo_auth
 
 import "net/http"
 

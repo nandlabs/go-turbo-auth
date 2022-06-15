@@ -1,4 +1,4 @@
-module go.nandlabs.io/turboauth
+module go.nandlabs.io/turbo-auth
 
 go 1.14
 
