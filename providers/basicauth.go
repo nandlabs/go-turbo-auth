@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/base64"
 	"go.nandlabs.io/l3"
-	turboAuth "go.nandlabs.io/turbo-auth"
+	"go.nandlabs.io/turboauth"
 	"net/http"
 	"strings"
 )
@@ -38,9 +38,9 @@ func (ba *BasicAuthFilter) Apply(next http.Handler) http.Handler {
 			httpError.generateError(w, r)
 		}
 		// perform pre-requisite checks
-		auth := r.Header.Get(turboAuth.HeaderAuthorization)
-		l := len(turboAuth.Basic)
-		if len(auth) > l+1 && strings.EqualFold(auth[:l], turboAuth.Basic) {
+		auth := r.Header.Get(turboauth.HeaderAuthorization)
+		l := len(turboauth.Basic)
+		if len(auth) > l+1 && strings.EqualFold(auth[:l], turboauth.Basic) {
 			basicAuth, err := base64.StdEncoding.DecodeString(auth[l+1:])
 			if err != nil {
 				httpError := &httpError{
@@ -49,7 +49,7 @@ func (ba *BasicAuthFilter) Apply(next http.Handler) http.Handler {
 				}
 				httpError.generateError(w, r)
 			}
-			logger.DebugF("basic token: %s", basicAuth)
+			logger.InfoF("basic token: %s", basicAuth)
 			tokenUsername := strings.Split(string(basicAuth), ":")[0]
 			tokenPassword := strings.Split(string(basicAuth), ":")[1]
 
