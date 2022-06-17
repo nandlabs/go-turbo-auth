@@ -2,10 +2,10 @@ package providers
 
 import (
 	"encoding/base64"
+	turboAuth "github.com/nandlabs/turbo-auth"
+	"github.com/nandlabs/turbo-auth/errors"
+	"github.com/nandlabs/turbo-auth/providers/basicauth"
 	"go.nandlabs.io/l3"
-	turboAuth "go.nandlabs.io/turbo-auth"
-	"go.nandlabs.io/turbo-auth/errors"
-	"go.nandlabs.io/turbo-auth/providers/basicauth"
 	"net/http"
 	"strings"
 )

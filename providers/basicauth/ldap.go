@@ -1,7 +1,7 @@
 package basicauth
 
 import (
-	"go.nandlabs.io/turbo-auth/errors"
+	"github.com/nandlabs/turbo-auth/errors"
 	"net/http"
 )
 
