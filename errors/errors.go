@@ -24,4 +24,5 @@ func (httpError *HttpError) GenerateError(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		return
 	}
+	return
 }
