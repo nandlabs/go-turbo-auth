@@ -3,12 +3,18 @@ package errors
 import (
 	"go.nandlabs.io/l3"
 	"net/http"
+	"reflect"
 )
 
 type (
 	HttpError struct {
 		StatusCode int
 		Message    string
+	}
+
+	JwtError struct {
+		err  error
+		code int
 	}
 )
 
@@ -25,4 +31,22 @@ func (httpError *HttpError) GenerateError(w http.ResponseWriter, r *http.Request
 		return
 	}
 	return
+}
+
+func NewJwtError(err interface{}, errCode int) *JwtError {
+	var j JwtError
+	if reflect.TypeOf(err) == reflect.TypeOf(&j) {
+		return err.(*JwtError)
+	}
+	return &JwtError{
+		err:  err.(error),
+		code: errCode,
+	}
+}
+
+func (err JwtError) Error() string {
+	if err.err != nil {
+		return err.err.Error()
+	}
+	return "Unknown Error Occurred"
 }
