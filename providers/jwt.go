@@ -94,6 +94,31 @@ func (jwtAuth *JwtAuth) handleRequest(w http.ResponseWriter, r *http.Request) *e
 }
 
 func (jwtAuth *JwtAuth) NullifyTokens(w http.ResponseWriter, r *http.Request) error {
+	var c credentials
+	if err := jwtAuth.fetchCredsFromRequest(r, &c); err != nil {
+		return errors.NewJwtError("Error fetching credentials from request", 500)
+	}
+
+	if jwtAuth.options.bearerTokens {
+		w.Header().Set(jwtAuth.options.authTokenName, "")
+		w.Header().Set(jwtAuth.options.refreshTokenName, "")
+	} else {
+		authCookie := http.Cookie{
+			Name:    jwtAuth.options.authTokenName,
+			Value:   "",
+			Expires: time.Now().Add(-1000 * time.Hour),
+		}
+
+		http.SetCookie(w, &authCookie)
+
+		refreshCookie := http.Cookie{
+			Name:    jwtAuth.options.refreshTokenName,
+			Value:   "",
+			Expires: time.Now().Add(-1000 * time.Hour),
+		}
+
+		http.SetCookie(w, &refreshCookie)
+	}
 
 }
 
