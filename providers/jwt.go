@@ -13,27 +13,18 @@ import (
 )
 
 type (
-	JwtAuth struct {
-		signKey   interface{}
-		verifyKey interface{}
-
-		options JwtOptions
-	}
-
-	JwtOptions struct {
+	JwtAuthConfig struct {
+		signingKey            string
 		signingMethod         string
-		privateKeyLocation    string
-		publicKeyLocation     string
 		bearerTokens          bool
 		refreshTokenValidTime time.Duration
 		authTokenValidTime    time.Duration
 		authTokenName         string
 		refreshTokenName      string
-		CSRFTokenName         string
 	}
 )
 
-func defaultOptions(options JwtOptions) JwtOptions {
+func defaultOptions(options JwtAuthConfig) JwtAuthConfig {
 	if options.refreshTokenValidTime <= 0 {
 		options.refreshTokenValidTime = turboAuth.DefaultRefreshTokenValidTime
 	}
@@ -60,15 +51,15 @@ func defaultOptions(options JwtOptions) JwtOptions {
 	return options
 }
 
-func (jwtAuth *JwtAuth) Apply(next http.Handler) http.Handler {
+func (authConfig *JwtAuthConfig) Apply(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		jwtErr := jwtAuth.handleRequest(w, r)
+		jwtErr := authConfig.handleRequest(w, r)
 		var j turboError.JwtError
 
 		if jwtErr != nil {
-			_ = jwtAuth.NullifyTokens(w, r)
+			_ = authConfig.NullifyTokens(w, r)
 			if reflect.TypeOf(jwtErr) == reflect.TypeOf(&j) {
 
 			}
@@ -78,7 +69,7 @@ func (jwtAuth *JwtAuth) Apply(next http.Handler) http.Handler {
 	})
 }
 
-func (jwtAuth *JwtAuth) handleRequest(w http.ResponseWriter, r *http.Request) *turboError.JwtError {
+func (authConfig *JwtAuthConfig) handleRequest(w http.ResponseWriter, r *http.Request) *turboError.JwtError {
 
 	if r.Method == "OPTIONS" {
 		logger.InfoF("Requested Method is OPTIONS")
@@ -97,7 +88,7 @@ func (jwtAuth *JwtAuth) handleRequest(w http.ResponseWriter, r *http.Request) *t
 	return nil
 }
 
-func (jwtAuth *JwtAuth) NullifyTokens(w http.ResponseWriter, r *http.Request) error {
+func (authConfig *JwtAuthConfig) NullifyTokens(w http.ResponseWriter, r *http.Request) error {
 	var c jwt.Credentials
 	if err := jwtAuth.fetchCredsFromRequest(r, &c); err != nil {
 		return turboError.NewJwtError("Error fetching credentials from request", 500)

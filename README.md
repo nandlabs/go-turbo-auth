@@ -24,6 +24,7 @@ validate token -> func
 config {
    signingKey: file or string
    signingMethod: HS256 or RS256
+   bearerTokens: bool -> tokens can be fetched from header or cookie
    refreshTokenValidTime: time.Duration
    authTokenValidTime:    time.Duration
    authTokenName:         string
