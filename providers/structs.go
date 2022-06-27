@@ -1,10 +1,18 @@
-package jwt
+package providers
 
-import (
-	"time"
-)
+import "time"
 
 type (
+	JwtAuthConfig struct {
+		SigningKey            string
+		SigningMethod         string
+		BearerTokens          bool
+		RefreshTokenValidTime time.Duration
+		AuthTokenValidTime    time.Duration
+		AuthTokenName         string
+		RefreshTokenName      string
+	}
+
 	Credentials struct {
 		CsrfString string
 
@@ -23,11 +31,3 @@ type (
 	jwtToken struct {
 	}
 )
-
-func (creds *Credentials) ValidateAndUpdateCreds() error {
-	return nil
-}
-
-func (creds *Credentials) BuildTokenWithClaims(token string, verifyKey interface{}, validTime time.Duration) *jwtToken {
-	return nil
-}

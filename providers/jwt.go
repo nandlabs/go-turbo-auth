@@ -1,27 +1,13 @@
 package providers
 
 import (
-	"net/http"
-	"reflect"
-	"time"
-
 	turboAuth "github.com/nandlabs/turbo-auth"
 	turboError "github.com/nandlabs/turbo-auth/errors"
+	"net/http"
+	"reflect"
 )
 
-type (
-	JwtAuthConfig struct {
-		SigningKey            string
-		SigningMethod         string
-		BearerTokens          bool
-		RefreshTokenValidTime time.Duration
-		AuthTokenValidTime    time.Duration
-		AuthTokenName         string
-		RefreshTokenName      string
-	}
-)
-
-func defaultOptions(options JwtAuthConfig) JwtAuthConfig {
+func defaultOptions(options *JwtAuthConfig) *JwtAuthConfig {
 	if options.RefreshTokenValidTime <= 0 {
 		options.RefreshTokenValidTime = turboAuth.DefaultRefreshTokenValidTime
 	}
@@ -52,7 +38,7 @@ func (authConfig *JwtAuthConfig) Apply(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		jwtErr := authConfig.handleRequest(w, r)
+		jwtErr := authConfig.HandleRequest(w, r)
 		var j turboError.JwtError
 
 		if jwtErr != nil {
@@ -66,8 +52,7 @@ func (authConfig *JwtAuthConfig) Apply(next http.Handler) http.Handler {
 	})
 }
 
-func CreateJwtAuthenticator(auth *JwtAuth, options JwtOptions) *JwtAuth {
-	auth.options = defaultOptions(options)
-	auth.options = options
+func CreateJwtAuthenticator(auth *JwtAuthConfig) *JwtAuthConfig {
+	auth = defaultOptions(auth)
 	return auth
 }

@@ -1,4 +1,4 @@
-package basicauth
+package providers
 
 import (
 	"github.com/nandlabs/turbo-auth/errors"
@@ -6,20 +6,18 @@ import (
 )
 
 type (
-	DBConfig struct {
-		driver string
+	LdapConfig struct {
 	}
 )
 
-func (config *DBConfig) Apply(next http.Handler) http.Handler {
+func (config *LdapConfig) Apply(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if (DBConfig{}) == *config {
+		if (LdapConfig{}) == *config {
 			httpError := &errors.HttpError{
 				StatusCode: http.StatusBadRequest,
-				Message:    "Error : DB filter requires a DB Config \n",
+				Message:    "Error : LDAP filter requires a LDAP Config \n",
 			}
 			httpError.GenerateError(w, r)
 		}
-
 	})
 }

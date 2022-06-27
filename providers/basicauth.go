@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	turboAuth "github.com/nandlabs/turbo-auth"
 	"github.com/nandlabs/turbo-auth/errors"
-	"github.com/nandlabs/turbo-auth/providers/basicauth"
 	"go.nandlabs.io/l3"
 	"net/http"
 	"strings"
@@ -14,9 +13,9 @@ type (
 	BasicAuthFilter struct {
 		basicAuthProvider bool
 		dbProvider        bool
-		dbConfig          basicauth.DBConfig
+		dbConfig          DBConfig
 		ldapProvider      bool
-		ldapConfig        basicauth.LdapConfig
+		ldapConfig        LdapConfig
 		Validator         BasicAuthValidator
 	}
 
