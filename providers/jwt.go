@@ -44,9 +44,18 @@ func (authConfig *JwtAuthConfig) Apply(next http.Handler) http.Handler {
 		if jwtErr != nil {
 			_ = authConfig.NullifyTokens(w, r)
 			if reflect.TypeOf(jwtErr) == reflect.TypeOf(&j) {
-
+				httpError := &turboError.HttpError{
+					StatusCode: http.StatusBadRequest,
+					Message:    "Error : invalid jwt token \n",
+				}
+				httpError.GenerateError(w, r)
 			}
 			// send error
+			httpError := &turboError.HttpError{
+				StatusCode: http.StatusBadRequest,
+				Message:    "Error : Basic auth filter requires a validator function \n",
+			}
+			httpError.GenerateError(w, r)
 		}
 		next.ServeHTTP(w, r)
 	})

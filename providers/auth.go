@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// HandleRequest fetch and validate incoming request token
 func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Request) *turboError.JwtError {
 
 	if r.Method == "OPTIONS" {
@@ -16,15 +17,21 @@ func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	var c Credentials
+	// fetch info from token
 	if err := authConfig.fetchCredsFromRequest(r, &c); err != nil {
 		return turboError.NewJwtError(err, 500)
 	}
 
+	// validate
 	if err := c.ValidateAndUpdateCreds(); err != nil {
 		return turboError.NewJwtError(err, 500)
 	}
 
 	return nil
+}
+
+func (authConfig *JwtAuthConfig) IssueNewToken() {
+
 }
 
 func (authConfig *JwtAuthConfig) fetchCredsFromRequest(r *http.Request, creds *Credentials) *turboError.JwtError {
