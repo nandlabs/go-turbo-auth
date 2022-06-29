@@ -1,4 +1,4 @@
-package providers
+package basicAuth
 
 /*import (
 	turboAuth "go.nandlabs.io/turbo-auth"

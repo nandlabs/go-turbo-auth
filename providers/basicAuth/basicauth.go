@@ -1,4 +1,4 @@
-package providers
+package basicAuth
 
 import (
 	"encoding/base64"

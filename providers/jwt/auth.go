@@ -1,4 +1,4 @@
-package providers
+package jwt
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Request) *turboError.JwtError {
 
 	if r.Method == "OPTIONS" {
-		logger.InfoF("Requested Method is OPTIONS")
+		//logger.InfoF("Requested Method is OPTIONS")
 		return nil
 	}
 
@@ -30,8 +30,14 @@ func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Re
 	return nil
 }
 
-func (authConfig *JwtAuthConfig) IssueNewToken() {
-
+func (authConfig *JwtAuthConfig) IssueNewToken(username string, duration time.Duration) (string, error) {
+	payload, err := NewPayload(username, duration)
+	if err != nil {
+		return "", err
+	}
+	jwtToken := BuildTokenWithClaims(authConfig.SigningMethod, payload)
+	token, err := jwtToken.SignedString([]byte(authConfig.SigningKey))
+	return token, err
 }
 
 func (authConfig *JwtAuthConfig) fetchCredsFromRequest(r *http.Request, creds *Credentials) *turboError.JwtError {

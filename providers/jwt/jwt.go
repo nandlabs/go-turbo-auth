@@ -1,4 +1,4 @@
-package providers
+package jwt
 
 import (
 	turboAuth "github.com/nandlabs/turbo-auth"
