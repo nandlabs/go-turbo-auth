@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (creds *Credentials) ValidateAndUpdateCreds() error {
+func (creds *Credentials) ValidateAndUpdateCreds(signKey string) error {
 	if creds.AuthToken == "" {
 		return errors.New("empty auth token")
 	}
@@ -15,13 +15,11 @@ func (creds *Credentials) ValidateAndUpdateCreds() error {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return token, nil
+		return []byte(signKey), nil
 	})
 	if err != nil {
-		fmt.Println("parsing error")
 		return err
 	}
-	fmt.Println("parsed token", token)
 	if token.Valid {
 		fmt.Println("token validated")
 	} else {

@@ -168,7 +168,6 @@ func TestJwtAuthConfig_IssueNewToken(t *testing.T) {
 	}
 }
 
-// TODO : jwt verification not working
 func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 	type fields struct {
 		SigningKey            string
@@ -221,7 +220,7 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 			}
 			authConfig = CreateJwtAuthenticator(authConfig)
 
-			tt.args.r.Header.Set(turbo_auth.DefaultBearerAuthTokenHeader, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.jhjnJDIMcXynEO39KVneryyvZKGDFdJCEJvBcsRniWA")
+			tt.args.r.Header.Set(turbo_auth.DefaultBearerAuthTokenHeader, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs")
 			if got := authConfig.HandleRequest(tt.args.w, tt.args.r); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("HandleRequest() = %v, want %v", got, tt.want)
 			}

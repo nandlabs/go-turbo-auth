@@ -27,7 +27,7 @@ func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	// validate
-	if err := c.ValidateAndUpdateCreds(); err != nil {
+	if err := c.ValidateAndUpdateCreds(authConfig.SigningKey); err != nil {
 		return turboError.NewJwtError(err, 403)
 	}
 
@@ -48,10 +48,6 @@ func (authConfig *JwtAuthConfig) IssueNewToken(username string, duration time.Du
 	}
 	token, err := jwtToken.SignedString([]byte(authConfig.SigningKey))
 	return token, turboError.NewJwtError(err, 406)
-}
-
-func (authConfig *JwtAuthConfig) VerifyToken() {
-
 }
 
 func (authConfig *JwtAuthConfig) fetchCredsFromRequest(r *http.Request, creds *Credentials) *turboError.JwtError {
