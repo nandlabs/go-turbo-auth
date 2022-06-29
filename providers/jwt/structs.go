@@ -16,8 +16,8 @@ type (
 	Credentials struct {
 		CsrfString string
 
-		AuthToken    *jwtToken
-		RefreshToken *jwtToken
+		AuthToken    string
+		RefreshToken string
 
 		Options credentialOptions
 	}

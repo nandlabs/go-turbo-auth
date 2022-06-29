@@ -13,8 +13,8 @@ type (
 	}
 
 	JwtError struct {
-		err  error
-		code int
+		Err  error
+		Code int
 	}
 )
 
@@ -38,15 +38,18 @@ func NewJwtError(err interface{}, errCode int) *JwtError {
 	if reflect.TypeOf(err) == reflect.TypeOf(&j) {
 		return err.(*JwtError)
 	}
+	if err == nil {
+		return nil
+	}
 	return &JwtError{
-		err:  err.(error),
-		code: errCode,
+		Err:  err.(error),
+		Code: errCode,
 	}
 }
 
 func (err JwtError) Error() string {
-	if err.err != nil {
-		return err.err.Error()
+	if err.Err != nil {
+		return err.Err.Error()
 	}
 	return "Unknown Error Occurred"
 }

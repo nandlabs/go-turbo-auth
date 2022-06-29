@@ -3,16 +3,20 @@ package jwt
 import (
 	"errors"
 	turboError "github.com/nandlabs/turbo-auth/errors"
+	"go.nandlabs.io/l3"
 	"net/http"
-	"strings"
 	"time"
+)
+
+var (
+	logger = l3.Get()
 )
 
 // HandleRequest fetch and validate incoming request token
 func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Request) *turboError.JwtError {
 
 	if r.Method == "OPTIONS" {
-		//logger.InfoF("Requested Method is OPTIONS")
+		logger.InfoF("Requested Method is OPTIONS")
 		return nil
 	}
 
@@ -24,20 +28,30 @@ func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Re
 
 	// validate
 	if err := c.ValidateAndUpdateCreds(); err != nil {
-		return turboError.NewJwtError(err, 500)
+		return turboError.NewJwtError(err, 403)
 	}
 
 	return nil
 }
 
-func (authConfig *JwtAuthConfig) IssueNewToken(username string, duration time.Duration) (string, error) {
+func (authConfig *JwtAuthConfig) IssueNewToken(username string, duration time.Duration) (string, *turboError.JwtError) {
 	payload, err := NewPayload(username, duration)
 	if err != nil {
-		return "", err
+		return "", turboError.NewJwtError(err, 406)
 	}
-	jwtToken := BuildTokenWithClaims(authConfig.SigningMethod, payload)
+	jwtToken, err := BuildTokenWithClaims(authConfig.SigningMethod, payload)
+	if err != nil {
+		return "", turboError.NewJwtError(err, 406)
+	}
+	if authConfig.SigningKey == "" {
+		return "", turboError.NewJwtError(errors.New("signingKey cannot be empty"), 406)
+	}
 	token, err := jwtToken.SignedString([]byte(authConfig.SigningKey))
-	return token, err
+	return token, turboError.NewJwtError(err, 406)
+}
+
+func (authConfig *JwtAuthConfig) VerifyToken() {
+
 }
 
 func (authConfig *JwtAuthConfig) fetchCredsFromRequest(r *http.Request, creds *Credentials) *turboError.JwtError {
@@ -46,14 +60,16 @@ func (authConfig *JwtAuthConfig) fetchCredsFromRequest(r *http.Request, creds *C
 		return turboError.NewJwtError(err, 500)
 	}
 
-	csrf, err := authConfig.fetchCsrfFromRequest(r)
+	/*csrf, err := authConfig.fetchCsrfFromRequest(r)
 	if err != nil {
 		return turboError.NewJwtError(err, 500)
 	}
-
-	if err := authConfig.buildCredentials(authToken, refreshToken, csrf, creds); err != nil {
+	*/
+	creds.AuthToken = authToken
+	creds.RefreshToken = refreshToken
+	/*if err := authConfig.buildCredentials(authToken, refreshToken, "", creds); err != nil {
 		return turboError.NewJwtError(err, 500)
-	}
+	}*/
 	return nil
 }
 
@@ -118,7 +134,7 @@ func (authConfig *JwtAuthConfig) fetchTokensFromRequest(r *http.Request) (string
 	return authCookieValue, refreshCookieValue, nil
 }
 
-func (authConfig *JwtAuthConfig) fetchCsrfFromRequest(r *http.Request) (string, *turboError.JwtError) {
+/*func (authConfig *JwtAuthConfig) fetchCsrfFromRequest(r *http.Request) (string, *turboError.JwtError) {
 	csrfString := r.FormValue(authConfig.CSRFTokenName)
 	if csrfString != "" {
 		return csrfString, nil
@@ -143,10 +159,10 @@ func (authConfig *JwtAuthConfig) buildCredentials(authToken string, refreshToken
 	creds.Options.RefreshTokenValidTime = authConfig.RefreshTokenValidTime
 	creds.Options.SigningMethod = authConfig.SigningMethod
 
-	creds.AuthToken = creds.BuildTokenWithClaims(authToken, authConfig.VerifyKey, authConfig.AuthTokenValidTime)
+	creds.AuthToken = creds.BuildTokenWithClaims(authToken, authConfig.SigningKey, authConfig.AuthTokenValidTime)
 
 	if refreshToken != "" {
-		creds.RefreshToken = creds.BuildTokenWithClaims(refreshToken, authConfig.verifyKey, authConfig.RefreshTokenValidTime)
+		creds.RefreshToken = creds.BuildTokenWithClaims(refreshToken, authConfig.SigningKey, authConfig.RefreshTokenValidTime)
 	}
 	return nil
-}
+}*/

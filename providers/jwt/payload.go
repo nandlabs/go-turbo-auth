@@ -18,6 +18,12 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
+	if username == "" {
+		return nil, errors.New("username is required to generate payload")
+	}
+	if duration == 0 {
+		return nil, errors.New("duration cannot be 0")
+	}
 	payload := &Payload{
 		ID:        token,
 		Username:  username,
