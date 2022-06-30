@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-func (creds *Credentials) ValidateAndUpdateCreds(signKey string) error {
+// currently working only for HMAC algo
+func (creds *Credentials) ValidateToken(signKey string) error {
 	if creds.AuthToken == "" {
 		return errors.New("empty auth token")
 	}

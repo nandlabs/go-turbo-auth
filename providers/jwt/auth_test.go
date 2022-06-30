@@ -1,7 +1,8 @@
 package jwt
 
 import (
-	turbo_auth "github.com/nandlabs/turbo-auth"
+	"errors"
+	turboAuth "github.com/nandlabs/turbo-auth"
 	turboError "github.com/nandlabs/turbo-auth/errors"
 	"net/http"
 	"net/http/httptest"
@@ -206,6 +207,26 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 			},
 			want: nil,
 		},
+		{
+			name: "Test_custom_auth_header_name",
+			fields: fields{
+				SigningKey:            "",
+				SigningMethod:         "",
+				BearerTokens:          true,
+				RefreshTokenValidTime: 0,
+				AuthTokenValidTime:    0,
+				AuthTokenName:         "Authorization",
+				RefreshTokenName:      "",
+			},
+			args: args{
+				w: httptest.NewRecorder(),
+				r: req,
+			},
+			want: &turboError.JwtError{
+				Err:  errors.New("empty auth token"),
+				Code: 403,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -220,9 +241,24 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 			}
 			authConfig = CreateJwtAuthenticator(authConfig)
 
-			tt.args.r.Header.Set(turbo_auth.DefaultBearerAuthTokenHeader, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs")
-			if got := authConfig.HandleRequest(tt.args.w, tt.args.r); !reflect.DeepEqual(got, tt.want) {
+			tt.args.r.Header.Set(turboAuth.DefaultBearerAuthTokenHeader, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs")
+
+			got := authConfig.HandleRequest(tt.args.w, tt.args.r)
+
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("HandleRequest() = %v, want %v", got, tt.want)
+			}
+
+			if got != nil {
+				if !reflect.DeepEqual(tt.want.Err, got.Err) {
+					t.Errorf("HandleRequest() = %v, want %v", got.Err, tt.want.Err)
+				}
+				if tt.want.Err.Error() != got.Err.Error() {
+					t.Errorf("HandleRequest() = %v, want %v", got.Err, tt.want.Err)
+				}
+				if tt.want.Code != got.Code {
+					t.Errorf("HandleRequest() = %v, want %v", got.Code, tt.want.Code)
+				}
 			}
 		})
 	}

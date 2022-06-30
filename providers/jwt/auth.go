@@ -27,7 +27,7 @@ func (authConfig *JwtAuthConfig) HandleRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	// validate
-	if err := c.ValidateAndUpdateCreds(authConfig.SigningKey); err != nil {
+	if err := c.ValidateToken(authConfig.SigningKey); err != nil {
 		return turboError.NewJwtError(err, 403)
 	}
 
