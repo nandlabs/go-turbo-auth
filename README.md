@@ -1,43 +1,39 @@
 # turbo-auth
+Turbo-auth provider is a collection of multiple authorization providers that can be used as a middlewares in any API.
 
-Providers exposed
-1. Basic-Auth
+---
+
+- [Installation](#installation)
+- [Test Coverage](#test-coverage)
+- [Quick Start Guide](#quick-start-guide)
+- [Detailed Documentation](#detailed-documentation)
+---
+
+### Installation
+
+```bash
+go get go.nandlabs.io/turbo-auth
+```
+
+### Test Coverage
+
+```bash
+WIP
+```
+
+### Quick Start Guide
+
+---
+
+The module exposes multiple authentication providers
+1. Basic Auth
 2. JWT
 3. OAuth2
 
-## Sub Providers
-1. Basic-Auth
-   1. database
-   2. ldap
+### Detailed Documentation
 
-   
-JWT
-other implementation
-token sent in request -> jwt middleware applied in go-turbo -> Apply function called -> internal handleRequest function called
--> fetch credentials from the request header -> fetch authToken, refreshToken, csrf -> assign the extracted values to the creds struct
+---
 
-
-Simple implementation
-issue new token -> func
-validate token -> func
-
-config {
-   signingKey: file or string
-   signingMethod: HS256 or RS256
-   bearerTokens: bool -> tokens can be fetched from header or cookie
-   refreshTokenValidTime: time.Duration
-   authTokenValidTime:    time.Duration
-   authTokenName:         string
-   refreshTokenName:      string
-}
-
-apply() {
-   if (token is expired){
-      issue_new_token()
-   }
-   
-   validate_incoming_token()
-   if (err) {
-      return 403 from middleware
-   }
-}
+* [Basic Auth](providers/basicAuth/README.md)
+* [JWT](providers/jwt/README.md)
+* [OAuth2](providers/oauth/README.md)
