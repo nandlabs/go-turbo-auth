@@ -114,19 +114,16 @@ func (authConfig *JwtAuthConfig) fetchTokensFromRequest(r *http.Request) (string
 	} else if err != nil {
 		return "", "", turboError.NewJwtError(errors.New("internal server error"), 500)
 	}
-
 	RefreshCookie, err := r.Cookie(authConfig.RefreshTokenName)
 	if err != nil && err == http.ErrNoCookie {
-		return "", "", turboError.NewJwtError(errors.New("internal server error"), 500)
+		return "", "", turboError.NewJwtError(errors.New("no refresh cookie present"), 401)
 	}
-
 	if AuthCookie != nil {
 		authCookieValue = AuthCookie.Value
 	}
 	if RefreshCookie != nil {
 		refreshCookieValue = RefreshCookie.Value
 	}
-
 	return authCookieValue, refreshCookieValue, nil
 }
 
