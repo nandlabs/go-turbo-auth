@@ -2,8 +2,8 @@ package jwt
 
 import (
 	"errors"
-	turboAuth "github.com/nandlabs/turbo-auth"
-	turboError "github.com/nandlabs/turbo-auth/errors"
+	turboAuth "go.nandlabs.io/turbo-auth"
+	turboError "go.nandlabs.io/turbo-auth/errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -183,7 +183,6 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 		w http.ResponseWriter
 		r *http.Request
 	}
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	tests := []struct {
 		name   string
 		fields fields
@@ -203,7 +202,24 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: req,
+				r: httptest.NewRequest(http.MethodGet, "/", nil),
+			},
+			want: nil,
+		},
+		{
+			name: "Test_request_options",
+			fields: fields{
+				SigningKey:            "",
+				SigningMethod:         "",
+				BearerTokens:          true,
+				RefreshTokenValidTime: 0,
+				AuthTokenValidTime:    0,
+				AuthTokenName:         "Authorization",
+				RefreshTokenName:      "",
+			},
+			args: args{
+				w: httptest.NewRecorder(),
+				r: httptest.NewRequest(http.MethodOptions, "/", nil),
 			},
 			want: nil,
 		},
@@ -220,11 +236,31 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: req,
+				r: httptest.NewRequest(http.MethodGet, "/", nil),
 			},
 			want: &turboError.JwtError{
 				Err:  errors.New("empty auth token"),
 				Code: 403,
+			},
+		},
+		{
+			name: "Test_no_bearer_tokens",
+			fields: fields{
+				SigningKey:            "",
+				SigningMethod:         "",
+				BearerTokens:          false,
+				RefreshTokenValidTime: 0,
+				AuthTokenValidTime:    0,
+				AuthTokenName:         "",
+				RefreshTokenName:      "",
+			},
+			args: args{
+				w: httptest.NewRecorder(),
+				r: httptest.NewRequest(http.MethodGet, "/", nil),
+			},
+			want: &turboError.JwtError{
+				Err:  errors.New("no auth cookie present"),
+				Code: 401,
 			},
 		},
 	}
@@ -261,5 +297,127 @@ func TestJwtAuthConfig_HandleRequest(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestJwtAuthConfig_RequestCookies(t *testing.T) {
+
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	authConfig := &JwtAuthConfig{
+		SigningKey:            "",
+		SigningMethod:         "",
+		BearerTokens:          false,
+		RefreshTokenValidTime: 20,
+		AuthTokenValidTime:    5,
+		AuthTokenName:         "",
+		RefreshTokenName:      "",
+	}
+
+	authConfig = CreateJwtAuthenticator(authConfig)
+
+	authCookie := &http.Cookie{
+		Name:       turboAuth.DefaultCookieAuthTokenName,
+		Value:      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs",
+		Path:       "",
+		Domain:     "",
+		Expires:    time.Now().Add(authConfig.AuthTokenValidTime),
+		RawExpires: "",
+		MaxAge:     0,
+		Secure:     false,
+		HttpOnly:   false,
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	}
+	r.AddCookie(authCookie)
+
+	want := &turboError.JwtError{
+		Err:  errors.New("no refresh cookie present"),
+		Code: 401,
+	}
+
+	got := authConfig.HandleRequest(w, r)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("HandleRequest() = %v, want %v", got, want)
+	}
+
+	refreshCookie := &http.Cookie{
+		Name:       turboAuth.DefaultCookieRefreshTokenName,
+		Value:      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs",
+		Path:       "",
+		Domain:     "",
+		Expires:    time.Now().Add(authConfig.RefreshTokenValidTime),
+		RawExpires: "",
+		MaxAge:     0,
+		Secure:     false,
+		HttpOnly:   false,
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	}
+	r.AddCookie(refreshCookie)
+
+	want2 := &turboError.JwtError{
+		Err:  errors.New("signature is invalid"),
+		Code: 403,
+	}
+	got2 := authConfig.HandleRequest(w, r)
+	if got2.Err.Error() != want2.Err.Error() {
+		t.Errorf("HandleRequest() = %v, want %v", got2, want2)
+	}
+}
+
+func Test_SuccessRequestCookies(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	authConfig := &JwtAuthConfig{
+		SigningKey:            "test_key",
+		SigningMethod:         "HS256",
+		BearerTokens:          false,
+		RefreshTokenValidTime: 20,
+		AuthTokenValidTime:    5,
+		AuthTokenName:         "",
+		RefreshTokenName:      "",
+	}
+
+	authConfig = CreateJwtAuthenticator(authConfig)
+
+	authCookie := &http.Cookie{
+		Name:       turboAuth.DefaultCookieAuthTokenName,
+		Value:      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs",
+		Path:       "",
+		Domain:     "",
+		Expires:    time.Now().Add(authConfig.AuthTokenValidTime),
+		RawExpires: "",
+		MaxAge:     0,
+		Secure:     false,
+		HttpOnly:   false,
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	}
+	r.AddCookie(authCookie)
+	refreshCookie := &http.Cookie{
+		Name:       turboAuth.DefaultCookieRefreshTokenName,
+		Value:      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjczODMyNjllLWY3ZTAtMTFlYy04NGUzLWFjZGU0ODAwMTEyMiIsIlVzZXJuYW1lIjoidGVzdF91c2VyIiwiSXNzdWVkQXQiOiIyMDIyLTA2LTMwVDAwOjQ5OjUyLjQzNTQ2OSswNTozMCIsIkV4cGlyZWRBdCI6IjIwMjItMDYtMzBUMDA6NDk6NTIuNDM1NDY5MDA1KzA1OjMwIn0.bikMDT8qAq2N0yEUGl68u4_5D-3MKWrMHdBAOI1Fdhs",
+		Path:       "",
+		Domain:     "",
+		Expires:    time.Now().Add(authConfig.RefreshTokenValidTime),
+		RawExpires: "",
+		MaxAge:     0,
+		Secure:     false,
+		HttpOnly:   false,
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	}
+	r.AddCookie(refreshCookie)
+
+	got := authConfig.HandleRequest(w, r)
+	if got != nil {
+		t.Errorf("HandleRequest() = %v, want %v", got, nil)
 	}
 }
