@@ -2,8 +2,8 @@ package jwt
 
 import (
 	"errors"
-	turboError "github.com/nandlabs/turbo-auth/errors"
 	"go.nandlabs.io/l3"
+	turboError "go.nandlabs.io/turbo-auth/errors"
 	"net/http"
 	"time"
 )

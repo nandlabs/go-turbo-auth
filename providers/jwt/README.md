@@ -5,6 +5,7 @@ The jwt implementation that can be used as a middleware by anyone who's using go
 
 - [Test Coverage](#test-coverage)
 - [Quick Start Guide](#quick-start-guide)
+- [Code Snippet](#code-snippet)
 ---
 
 ### Test Coverage
@@ -21,6 +22,12 @@ The module exposes mainly 2 functionalities
 2. Verification of the JWT Token
 
 We are constantly working on adding more features in our module.
+```
+
+## Code Snippet
+
+```go
+
 ```
 
 // TODO
