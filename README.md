@@ -1,3 +1,24 @@
+# Archival Notice !
+
+Dear Contributors and Users,
+
+We have decided to merge the codebase with
+[golly](https://github.com/nandlabs/golly). As a result, this repository will be
+archived.
+
+Thank you for your contributions and support throughout the lifespan of this
+project.
+
+While active development will cease here, the project's objectives will continue
+under the new initiative.
+
+For any inquiries or further information, please refer to the new
+[project repository](https://github.com/nandlabs/golly).
+
+Thank you, 
+
+Project Maintainers
+
 # turbo-auth
 Turbo-auth provider is a collection of multiple authorization providers that can be used as a middlewares in any API.
 
