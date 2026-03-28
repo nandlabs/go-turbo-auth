@@ -5,12 +5,13 @@ The jwt implementation that can be used as a middleware by anyone who's using go
 
 - [Test Coverage](#test-coverage)
 - [Quick Start Guide](#quick-start-guide)
+- [Code Snippet](#code-snippet)
 ---
 
 ### Test Coverage
 
 ```bash
-57.5 %
+72.3 %
 ```
 
 ### Quick Start Guide
@@ -22,3 +23,12 @@ The module exposes mainly 2 functionalities
 
 We are constantly working on adding more features in our module.
 ```
+
+## Code Snippet
+
+```go
+
+```
+
+// TODO
+1. Verify the expiration of token, test cases need to be altered based on that

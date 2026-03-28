@@ -1,8 +1,8 @@
 package jwt
 
 import (
-	turboAuth "github.com/nandlabs/turbo-auth"
-	turboError "github.com/nandlabs/turbo-auth/errors"
+	turboAuth "go.nandlabs.io/turbo-auth"
+	turboError "go.nandlabs.io/turbo-auth/errors"
 	"net/http"
 	"reflect"
 )

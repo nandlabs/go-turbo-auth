@@ -2,9 +2,9 @@ package basicAuth
 
 import (
 	"encoding/base64"
-	turboAuth "github.com/nandlabs/turbo-auth"
-	"github.com/nandlabs/turbo-auth/errors"
 	"go.nandlabs.io/l3"
+	turboAuth "go.nandlabs.io/turbo-auth"
+	"go.nandlabs.io/turbo-auth/errors"
 	"net/http"
 	"strings"
 )

@@ -19,10 +19,11 @@ func (creds *Credentials) ValidateToken(signKey string) error {
 		return []byte(signKey), nil
 	})
 	if err != nil {
+		logger.InfoF("%s", err)
 		return err
 	}
 	if token.Valid {
-		fmt.Println("token validated")
+		logger.InfoF("token validated")
 	} else {
 		return errors.New("invalid token passed")
 	}

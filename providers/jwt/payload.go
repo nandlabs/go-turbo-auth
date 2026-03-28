@@ -2,19 +2,19 @@ package jwt
 
 import (
 	"errors"
-	"github.com/google/uuid"
+	"os/exec"
 	"time"
 )
 
 type Payload struct {
-	ID        uuid.UUID
+	ID        []byte
 	Username  string
 	IssuedAt  time.Time
 	ExpiredAt time.Time
 }
 
 func NewPayload(username string, duration time.Duration) (*Payload, error) {
-	token, err := uuid.NewUUID()
+	token, err := exec.Command("uuidgen").Output()
 	if err != nil {
 		return nil, err
 	}
